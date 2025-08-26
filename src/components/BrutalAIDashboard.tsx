@@ -14,6 +14,8 @@ export default function BrutalAIDashboard() {
   const [aiAnalysis, setAIAnalysis] = useState<AIAnalysis | null>(null)
   const [loading, setLoading] = useState(false)
   const runIdRef = useRef(0)
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
+
 
   useEffect(() => {
     const runId = ++runIdRef.current
