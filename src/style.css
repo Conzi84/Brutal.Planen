@@ -1,1 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* optional helper */
+.brutal-border { @apply border-4 border-black; }
 
