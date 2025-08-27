@@ -1,9 +1,37 @@
-export type Item = {
+// MASSIV ERWEITERTE KEYWORD-SETS basierend auf echter Nutzereingabe
+const keywordSets = {
+  urgent: ['urgent', 'asap', 'sofort', 'dringend', 'wichtig', 'deadline', 'kritisch', 'morgen', 'heute', 'eilig', 'priority', 'offen', 'muss'],
+  termine: [
+    // Basis-Termine
+    'termin', 'meeting', 'call', 'besprechung', 'datum', 'uhr', 'kick-off', 
+    'donnerstag', 'freitag', 'montag', 'dienstag', 'mittwoch', 'samstag', 'sonntag',
+    'workshop', 'konferenz', 'presentation', 'demo', 'review',
+    // Neue: Geschäftstermine
+    'vorstellung', 'firma', 'gespräch', 'gespräche', 'mitarbeiterversammlung',
+    'wirtschaftsförderung', 'akademie', 'weiterbildung', 'seminar'
+  ],
+  knowledge: [
+    // Basis-Learning
+    'lernen', 'research', 'studium', 'wissen', 'analyse', 'workshop', 'kurs', 
+    'lesen', 'paper', 'buch', 'training', 'fortbildung', 'weiterbildung',
+    'skill', 'kompetenz', 'expertise', 'zertifikat',
+    // Neue: KI-spezifisch
+    'iso', 'iec', 'standard', 'spezialisierung', 'orchestrierung', 'bedienung', 
+    'governance', 'prompting', 'prompt', 'automationen', 'agentic ai', 'agenten',
+    'ki', 'ai', 'artificial intelligence', 'machine learning', 'ml'
+  ],
+  risk: [
+    // Basis-Risk
+    'risiko', 'risk', 'gefahr', 'problem', 'compliance', 'audit', 'datenschutz', 
+    'gdpr', 'legal', 'regulatorisch', 'bnetza', 'gesetz', 'verordnung',
+    'haftung', 'sicherheit', 'vulnerability', 'threat',
+    //export type Item = {
   id: number
   text: string
   priority: 'HIGH' | 'MEDIUM' | 'LOW'
   category: 'GENERAL' | 'BUSINESS' | 'RISK' | 'TERMIN' | 'KNOWLEDGE'
   confidence: number
+  matchedKeywords?: string[] // NEW: Welche Keywords haben getriggert
 }
 
 export type BasicAnalysis = {
@@ -23,11 +51,17 @@ export type BasicAnalysis = {
       business: number
     }
   }
+  // NEW: Feedback-System
+  categorizationFeedback: {
+    uncategorized: string[]
+    lowConfidence: Item[]
+    suggestions: string[]
+  }
 }
 
 export type AIAnalysis = {
   semanticInsights: {
-    energyDomainItems: Array<{ text: string; insight?: string; businessPotential: string }>
+    energyDomainItems: Array<{ text: string; insight?: string; businessPotential: string; source: 'detected' | 'static' }>
     businessOpportunities: Array<{ text: string; monetizationPotential: string; effort?: string }>
     riskClusters: Array<{ cluster: string; items: string[]; severity: 'critical' | 'high' | 'medium' }>
   }
@@ -36,12 +70,21 @@ export type AIAnalysis = {
     workLifeBalance: Array<{ item: string; balanceImpact: 'positive' | 'negative'; recommendation: string }>
     regulatoryUrgency: Array<{ item: string; complianceRisk: 'CRITICAL' | 'HIGH' | 'MEDIUM'; action: string }>
   }
-  predictiveRecommendations: Array<{ type: 'STRATEGIC' | 'RISK' | 'BUSINESS' | 'PERFORMANCE'; title: string; message: string; confidence: number }>
+  predictiveRecommendations: Array<{ 
+    type: 'STRATEGIC' | 'RISK' | 'BUSINESS' | 'PERFORMANCE'
+    title: string
+    message: string
+    confidence: number
+    basis: string // NEW: Basis der Empfehlung
+  }>
   performanceMetrics: {
     knowledgeToActionRatio: number
     businessFocusScore: number
     riskManagementCoverage: number
     workLifeIntegration: number
+    // NEW: Qualitäts-Metriken
+    categorizationAccuracy: number
+    keywordCoverage: number
   }
 }
 
@@ -66,43 +109,191 @@ Regulatory Report BNetzA Meldung fertigstellen - deadline morgen
 Student anfragen: Masterarbeit über KI im Energiesektor betreuen
 Prompt Engineering Guide für Energiebranche schreiben - Content Marketing`
 
+// MASSIV ERWEITERTE KEYWORD-SETS basierend auf echter Nutzereingabe
+const keywordSets = {
+  urgent: [
+    'urgent', 'asap', 'sofort', 'dringend', 'wichtig', 'deadline', 'kritisch', 
+    'morgen', 'heute', 'eilig', 'priority', 'offen', 'muss'
+  ],
+  termine: [
+    // Basis-Termine
+    'termin', 'meeting', 'call', 'besprechung', 'datum', 'uhr', 'kick-off', 
+    'donnerstag', 'freitag', 'montag', 'dienstag', 'mittwoch', 'samstag', 'sonntag',
+    'workshop', 'konferenz', 'presentation', 'demo', 'review',
+    // Neue: Geschäftstermine
+    'vorstellung', 'firma', 'gespräch', 'gespräche', 'mitarbeiterversammlung',
+    'wirtschaftsförderung', 'akademie', 'weiterbildung', 'seminar'
+  ],
+  knowledge: [
+    // Basis-Learning
+    'lernen', 'research', 'studium', 'wissen', 'analyse', 'workshop', 'kurs', 
+    'lesen', 'paper', 'buch', 'training', 'fortbildung', 'weiterbildung',
+    'skill', 'kompetenz', 'expertise', 'zertifikat',
+    // Neue: KI-spezifisch
+    'iso', 'iec', 'standard', 'spezialisierung', 'orchestrierung', 'bedienung', 
+    'governance', 'prompting', 'prompt', 'automationen', 'agentic ai', 'agenten',
+    'ki', 'ai', 'artificial intelligence', 'machine learning', 'ml'
+  ],
+  risk: [
+    // Basis-Risk
+    'risiko', 'risk', 'gefahr', 'problem', 'compliance', 'audit', 'datenschutz', 
+    'gdpr', 'legal', 'regulatorisch', 'bnetza', 'gesetz', 'verordnung',
+    'haftung', 'sicherheit', 'vulnerability', 'threat',
+    // Neue: Pain Points & Probleme
+    'pain points', 'problemfelder', 'herausforderung', 'schwierigkeit'
+  ],
+  business: [
+    // Basis-Business
+    'business', 'idee', 'plan', 'beratung', 'monetar', 'einkommen', 'kunde', 
+    'markt', 'umsatz', 'gewinn', 'roi', 'investment', 'strategie',
+    'marketing', 'verkauf', 'akquisition', 'expansion',
+    // Neue: Prozesse & Strukturen
+    'anwendungsfälle', 'controlling', 'vertrieb', 'abrechnung', 'prozesse',
+    'unternehmenskommunikation', 'abteilungen', 'priorisierung', 'ansprechpartner',
+    'beraterfirmen', 'externe', 'vorbereitung', 'neuaufstellung', 'leitfaden'
+  ],
+  // Tasks/Setup - Neue Kategorie
+  setup: [
+    'setup', 'installation', 'konfiguration', 'laptop', 'google konto',
+    'checkliste', 'formular', 'anwendungsanweisung', 'liste erstellen',
+    'recherche', 'abfrage'
+  ],
+  // Energie-spezifische Keywords
+  energy: [
+    'energie', 'strom', 'gas', 'stadtwerke', 'smart grid', 'renewable',
+    'photovoltaik', 'windkraft', 'energieprognose', 'netzbetrieb', 'eeg',
+    'kwk', 'fernwärme', 'blockchain', 'e-mobility', 'speicher',
+    // Neue: Spezifische Unternehmen
+    'wemag', 'dotsource', 'rostock', 'innocampus'
+  ]
+}
+
 export function performBasicAnalysis(content: string): BasicAnalysis {
   const lines = content.split('\n').filter(line => line.trim())
-
+  
   const todos: Item[] = []
   const termine: Item[] = []
   const knowledge: Item[] = []
   const risiken: Item[] = []
   const business: Item[] = []
-
-  const urgentKeywords = ['urgent', 'asap', 'sofort', 'dringend', 'wichtig', 'deadline', 'kritisch', 'morgen']
-  const terminKeywords = ['termin', 'meeting', 'call', 'besprechung', 'datum', 'uhr', 'kick-off', 'donnerstag', 'freitag']
-  const knowledgeKeywords = ['lernen', 'research', 'studium', 'wissen', 'analyse', 'workshop', 'kurs', 'lesen', 'paper', 'buch']
-  const riskKeywords = ['risiko', 'risk', 'gefahr', 'problem', 'compliance', 'audit', 'datenschutz', 'gdpr', 'legal']
-  const businessKeywords = ['business', 'idee', 'plan', 'beratung', 'monetar', 'einkommen', 'kunde', 'markt']
+  const uncategorized: string[] = []
+  const lowConfidence: Item[] = []
+  const suggestions: string[] = []
 
   lines.forEach((line, index) => {
     const lower = line.toLowerCase()
-    const priority: Item['priority'] = urgentKeywords.some(k => lower.includes(k)) ? 'HIGH' : 'MEDIUM'
-    const item: Item = { id: index, text: line.trim(), priority, category: 'GENERAL', confidence: 0.8 }
+    let category: Item['category'] = 'GENERAL'
+    let priority: Item['priority'] = 'MEDIUM'
+    let confidence = 0.5
+    const matchedKeywords: string[] = []
 
-    if (businessKeywords.some(k => lower.includes(k))) {
-      item.category = 'BUSINESS'
-      business.push(item)
-    } else if (riskKeywords.some(k => lower.includes(k))) {
-      item.category = 'RISK'
-      item.priority = 'HIGH'
-      risiken.push(item)
-    } else if (terminKeywords.some(k => lower.includes(k))) {
-      item.category = 'TERMIN'
-      termine.push(item)
-    } else if (knowledgeKeywords.some(k => lower.includes(k))) {
-      item.category = 'KNOWLEDGE'
-      knowledge.push(item)
-    } else {
-      todos.push(item)
+    // Priority-Check (affects all categories)
+    if (keywordSets.urgent.some(k => {
+      if (lower.includes(k)) {
+        matchedKeywords.push(k)
+        return true
+      }
+      return false
+    })) {
+      priority = 'HIGH'
+      confidence += 0.2
+    }
+
+    // Category Detection mit Scoring
+    let categoryScores = {
+      business: 0,
+      risk: 0,
+      termine: 0,
+      knowledge: 0,
+      energy: 0
+    }
+
+    // Score each category
+    Object.entries(keywordSets).forEach(([cat, keywords]) => {
+      if (cat === 'urgent') return // Skip urgent, already handled
+      
+      keywords.forEach(keyword => {
+        if (lower.includes(keyword)) {
+          matchedKeywords.push(keyword)
+          categoryScores[cat as keyof typeof categoryScores] += 1
+          confidence += 0.1
+        }
+      })
+    })
+
+    // Determine best category
+    const bestCategory = Object.entries(categoryScores).reduce((a, b) => 
+      categoryScores[a[0] as keyof typeof categoryScores] > categoryScores[b[0] as keyof typeof categoryScores] ? a : b
+    )[0]
+
+    const maxScore = categoryScores[bestCategory as keyof typeof categoryScores]
+
+    if (maxScore === 0) {
+      uncategorized.push(line)
+      category = 'GENERAL'
+      confidence = 0.3
+    } else if (maxScore === 1) {
+      // Low confidence - single keyword match
+      confidence = Math.min(confidence, 0.7)
+    }
+
+    // Map to our categories
+    switch (bestCategory) {
+      case 'business':
+        category = 'BUSINESS'
+        break
+      case 'risk':
+        category = 'RISK'
+        priority = 'HIGH' // Risk items are always high priority
+        break
+      case 'termine':
+        category = 'TERMIN'
+        break
+      case 'knowledge':
+        category = 'KNOWLEDGE'
+        break
+    }
+
+    const item: Item = { 
+      id: index, 
+      text: line.trim(), 
+      priority, 
+      category, 
+      confidence: Math.min(confidence, 1.0),
+      matchedKeywords 
+    }
+
+    // Track low confidence items
+    if (confidence < 0.6) {
+      lowConfidence.push(item)
+    }
+
+    // Distribute to arrays
+    switch (category) {
+      case 'BUSINESS':
+        business.push(item)
+        break
+      case 'RISK':
+        risiken.push(item)
+        break
+      case 'TERMIN':
+        termine.push(item)
+        break
+      case 'KNOWLEDGE':
+        knowledge.push(item)
+        break
+      default:
+        todos.push(item)
     }
   })
+
+  // Generate suggestions
+  if (uncategorized.length > 0) {
+    suggestions.push(`${uncategorized.length} Items konnten nicht kategorisiert werden. Versuchen Sie spezifischere Keywords.`)
+  }
+  if (lowConfidence.length > 3) {
+    suggestions.push("Mehrere Items haben niedrige Konfidenz. Verwenden Sie klarere Begriffe wie 'meeting', 'deadline', 'research'.")
+  }
 
   const flat = [...todos, ...termine, ...knowledge, ...risiken, ...business]
   const insights = {
@@ -121,56 +312,151 @@ export function performBasicAnalysis(content: string): BasicAnalysis {
     }
   }
 
-  return { todos, termine, knowledge, risiken, business, insights }
+  return { 
+    todos, 
+    termine, 
+    knowledge, 
+    risiken, 
+    business, 
+    insights,
+    categorizationFeedback: {
+      uncategorized,
+      lowConfidence,
+      suggestions
+    }
+  }
 }
 
 export function generateFallbackAIAnalysis(basic: BasicAnalysis): AIAnalysis {
+  // Dynamically extract energy-related items from actual data
+  const allItems = [...basic.todos, ...basic.termine, ...basic.knowledge, ...basic.risiken, ...basic.business]
+  const energyDetectedItems = allItems.filter(item => 
+    keywordSets.energy.some(keyword => 
+      item.text.toLowerCase().includes(keyword)
+    )
+  ).map(item => ({
+    text: item.text,
+    insight: 'Direkt aus Ihren Eingabedaten erkannt',
+    businessPotential: 'Konkretes Business-Potenzial im Energiesektor',
+    source: 'detected' as const
+  }))
+
+  // Add static items if no energy items detected
+  const staticEnergyItems = energyDetectedItems.length === 0 ? [
+    { text: 'Smart Grid Implementation', insight: 'Core infrastructure transformation', businessPotential: 'Consulting opportunity for other utilities', source: 'static' as const },
+    { text: 'Energy Forecasting ML', insight: 'Direct operational improvement', businessPotential: 'Proprietary algorithm development', source: 'static' as const }
+  ] : []
+
+  // Calculate REAL performance metrics based on data
+  const totalItems = basic.insights.totalItems
+  const knowledgeToActionRatio = totalItems > 0 ? Math.round((basic.knowledge.length / totalItems) * 100) : 0
+  const businessFocusScore = totalItems > 0 ? Math.round((basic.business.length / totalItems) * 100) : 0
+  const riskManagementCoverage = totalItems > 0 ? Math.round((basic.risiken.length / totalItems) * 100) : 0
+  
+  // Work-Life Balance basiert auf erkannten Balance-Keywords
+  const workLifeIntegration = allItems.filter(item => 
+    item.text.toLowerCase().includes('yoga') || 
+    item.text.toLowerCase().includes('mindfulness') ||
+    item.text.toLowerCase().includes('balance') ||
+    item.text.toLowerCase().includes('mittag')
+  ).length > 0 ? 80 : 40
+
+  // NEUE: Qualitäts-Metriken basierend auf Feedback
+  const categorizationAccuracy = totalItems > 0 ? 
+    Math.round(((totalItems - basic.categorizationFeedback.lowConfidence.length) / totalItems) * 100) : 90
+  const keywordCoverage = totalItems > 0 ?
+    Math.round(((totalItems - basic.categorizationFeedback.uncategorized.length) / totalItems) * 100) : 100
+
+  // Generate DYNAMIC recommendations based on actual data
+  const recommendations = []
+  
+  if (basic.business.length > 0) {
+    recommendations.push({
+      type: 'STRATEGIC' as const,
+      title: 'BUSINESS OPPORTUNITIES DETECTED',
+      message: `${basic.business.length} Business-Items gefunden. KI-Beratung & Anwendungsfälle zeigen Monetarisierungspotential.`,
+      confidence: Math.min(95, 60 + basic.business.length * 8),
+      basis: `Erkannte Business-Keywords: ${basic.business.flatMap(b => b.matchedKeywords || []).slice(0,3).join(', ')}`
+    })
+  }
+
+  if (basic.risiken.length > 1) {
+    recommendations.push({
+      type: 'RISK' as const,
+      title: 'COMPLIANCE & GOVERNANCE CLUSTER',
+      message: `${basic.risiken.length} Risiko-Items erkannt. KI-Governance wird kritisch wichtig.`,
+      confidence: Math.min(95, 70 + basic.risiken.length * 8),
+      basis: `Pain Points & Compliance-Keywords in Ihren Daten erkannt`
+    })
+  }
+
+  if (basic.knowledge.length > basic.todos.length + basic.business.length) {
+    recommendations.push({
+      type: 'PERFORMANCE' as const,
+      title: 'LEARNING-TO-ACTION IMBALANCE',
+      message: 'Viel KI-Wissen (Prompting, Governance) aber wenig konkrete Umsetzung. Action-Items priorisieren!',
+      confidence: 85,
+      basis: `Knowledge Items (${basic.knowledge.length}) > Action Items (${basic.todos.length + basic.business.length})`
+    })
+  }
+
+  // NEUE: Termin-basierte Empfehlung
+  if (basic.termine.length >= 4) {
+    recommendations.push({
+      type: 'STRATEGIC' as const,
+      title: 'NETWORKING & PARTNERSHIP MOMENTUM',
+      message: `${basic.termine.length} Termine erkannt. Starkes Netzwerk für KI-Business-Development nutzen!`,
+      confidence: 90,
+      basis: `Termine mit Stadtwerke, Beraterfirmen, und KI-Akademie erkannt`
+    })
+  }
+
   return {
     semanticInsights: {
-      energyDomainItems: [
-        { text: 'Smart Grid Implementation', insight: 'Core infrastructure transformation', businessPotential: 'Consulting opportunity for other utilities' },
-        { text: 'Energy Forecasting ML', insight: 'Direct operational improvement', businessPotential: 'Proprietary algorithm development' },
-        { text: 'Renewable Energy Analysis', insight: 'Future energy mix strategy', businessPotential: 'Expertise monetization through training' }
-      ],
-      businessOpportunities: [
-        { text: 'KI-Prompting Kurse', monetizationPotential: 'Direct revenue through education', effort: 'medium' },
-        { text: 'AI Consulting Stadtwerke', monetizationPotential: 'B2B expertise monetization', effort: 'high' },
-        { text: 'Content Marketing', monetizationPotential: 'Authority + lead generation', effort: 'low' }
-      ],
-      riskClusters: [
-        { cluster: 'Regulatory Compliance', items: ['GDPR Audit', 'BNetzA Meldung'], severity: 'critical' },
-        { cluster: 'Technology Integration', items: ['Legacy System Problems'], severity: 'high' },
-        { cluster: 'Strategic Planning', items: ['KI-Strategieplan Q2'], severity: 'medium' }
-      ]
+      energyDomainItems: [...energyDetectedItems, ...staticEnergyItems],
+      businessOpportunities: basic.business.map(item => ({
+        text: item.text,
+        monetizationPotential: item.confidence > 0.7 ? 'High potential - konkrete Anwendungsfälle erkannt' : 'Medium potential',
+        effort: item.priority === 'HIGH' ? 'low' : 'medium'
+      })),
+      riskClusters: basic.risiken.length > 0 ? [
+        { 
+          cluster: 'KI Governance & Compliance', 
+          items: basic.risiken.map(r => r.text), 
+          severity: basic.risiken.some(r => r.priority === 'HIGH') ? 'critical' as const : 'high' as const
+        }
+      ] : []
     },
     intelligentPrioritization: {
-      criticalPath: [
-        { item: 'Regulatory Report deadline morgen', reasoning: 'Legal compliance cannot be delayed', deadline: 'TOMORROW' },
-        { item: 'GDPR KI-Tools Audit', reasoning: 'Regulatory risk exposure', deadline: '2 weeks' },
-        { item: 'Vorstand Digitalisierungsbudget', reasoning: 'Strategic funding decision', deadline: 'This week' }
-      ],
-      workLifeBalance: [
-        { item: 'Mindfulness Session', balanceImpact: 'positive', recommendation: 'After work hours' },
-        { item: 'Yoga Session', balanceImpact: 'positive', recommendation: 'Stress relief after demanding days' },
-        { item: 'KI-Strategieplan', balanceImpact: 'negative', recommendation: 'Time-box to prevent overwork' }
-      ],
-      regulatoryUrgency: [
-        { item: 'BNetzA Report', complianceRisk: 'CRITICAL', action: 'Complete immediately' },
-        { item: 'GDPR Assessment', complianceRisk: 'HIGH', action: 'Schedule within 14 days' },
-        { item: 'IT-Security Framework', complianceRisk: 'MEDIUM', action: 'Coordinate with compliance team' }
-      ]
+      criticalPath: basic.risiken.filter(r => r.priority === 'HIGH').map(item => ({
+        item: item.text,
+        reasoning: 'High-priority compliance/risk item - KI-Governance kritisch',
+        deadline: item.text.toLowerCase().includes('morgen') ? 'TOMORROW' : 
+                 item.text.toLowerCase().includes('offen') ? 'ASAP' : 'This week'
+      })),
+      workLifeBalance: allItems.filter(item => 
+        item.text.toLowerCase().includes('mittag') || 
+        item.text.toLowerCase().includes('balance') ||
+        item.text.toLowerCase().includes('mitarbeiterversammlung')
+      ).map(item => ({
+        item: item.text,
+        balanceImpact: 'positive' as const,
+        recommendation: 'Time-blocking für Work-Life Integration'
+      })),
+      regulatoryUrgency: basic.risiken.map(item => ({
+        item: item.text,
+        complianceRisk: item.priority === 'HIGH' ? 'CRITICAL' as const : 'MEDIUM' as const,
+        action: item.text.toLowerCase().includes('offen') ? 'Schedule immediately' : 'Plan within sprint'
+      }))
     },
-    predictiveRecommendations: [
-      { type: 'STRATEGIC', title: 'AI EXPERTISE MONETIZATION', message: 'Unique combo (risk mgmt + AI + energy) → premium consulting', confidence: 95 },
-      { type: 'RISK', title: 'COMPLIANCE CLUSTER RISK', message: 'Multiple regulatory deadlines converging', confidence: 90 },
-      { type: 'BUSINESS', title: 'STUDENT MARKET UNTAPPED', message: 'Growing demand for AI prompting skills', confidence: 85 },
-      { type: 'PERFORMANCE', title: 'KNOWLEDGE-TO-ACTION', message: 'Convert learning to implementation for ROI', confidence: 80 }
-    ],
+    predictiveRecommendations: recommendations,
     performanceMetrics: {
-      knowledgeToActionRatio: 75,
-      businessFocusScore: 60,
-      riskManagementCoverage: 85,
-      workLifeIntegration: 70
+      knowledgeToActionRatio,
+      businessFocusScore,
+      riskManagementCoverage,
+      workLifeIntegration,
+      categorizationAccuracy,
+      keywordCoverage
     }
   }
 }
