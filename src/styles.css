@@ -2,6 +2,79 @@
 @tailwind components;
 @tailwind utilities;
 
-/* optional helper */
-.brutal-border { @apply border-4 border-black; }
+/* Import IBM Plex Sans font */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
 
+/* Custom utilities for Neo-Brutalism */
+@layer utilities {
+  .brutal-border { 
+    @apply border-2 border-black; 
+  }
+  
+  .brutal-shadow { 
+    box-shadow: 4px 4px 0px 0px #000000;
+  }
+  
+  .brutal-button {
+    @apply bg-black text-white font-bold py-2 px-3 border-2 border-black rounded-md uppercase text-sm tracking-tight hover:bg-gray-900 transition-colors;
+  }
+  
+  .brutal-button-secondary {
+    @apply bg-gray-100 text-black font-bold py-2 px-3 border-2 border-black rounded-md uppercase text-sm hover:bg-gray-200 transition-colors;
+  }
+  
+  .brutal-card {
+    @apply bg-white border-2 border-black rounded p-4 mb-4 font-sans;
+  }
+  
+  .brutal-stat {
+    @apply bg-gray-100 border-2 border-black rounded p-6 text-center font-sans;
+  }
+  
+  .brutal-tag {
+    @apply text-xs font-bold uppercase rounded-full px-2 py-1;
+  }
+  
+  .brutal-input {
+    @apply w-full border-2 border-black rounded px-4 py-2 mb-2 focus:outline-none focus:ring-2 focus:ring-black;
+  }
+}
+
+/* Global font override */
+body {
+  font-family: 'IBM Plex Sans', sans-serif;
+}
+
+/* Scrollbar styling for better brutalist look */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border: 1px solid #000;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #000;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #333;
+}
+
+/* Custom animations */
+@keyframes pulse-brutal {
+  0%, 100% {
+    transform: scale(1);
+    border-width: 2px;
+  }
+  50% {
+    transform: scale(1.05);
+    border-width: 3px;
+  }
+}
+
+.animate-pulse-brutal {
+  animation: pulse-brutal 2s infinite;
+}
