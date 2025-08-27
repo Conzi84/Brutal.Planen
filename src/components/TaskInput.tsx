@@ -12,10 +12,10 @@ export default function TaskInput({ onSave, onBack, initialContent = '' }: TaskI
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
 
   const quickTemplates = [
-    { category: 'MEETING', template: 'Meeting mit [Partner] am [Datum] [Zeit] - [Thema]', icon: Users },
-    { category: 'DEADLINE', template: '[Projekt] fertigstellen - Deadline [Datum]', icon: AlertCircle },
-    { category: 'LEARNING', template: 'Research: [Thema] - [Ziel]', icon: Target },
-    { category: 'BUSINESS', template: 'Business Idee: [Konzept] - [Potenzial]', icon: TrendingUp },
+    { category: 'MEETING', template: '[DD.MM.YY] Firma [Name] [Zweck]', icon: Users },
+    { category: 'TASK', template: 'Offen [Task-Type] [Details] - [Person/Firma]', icon: AlertCircle },
+    { category: 'KI-LEARNING', template: '[Skill] im Bereich AI - [Spezialisierung]', icon: Target },
+    { category: 'BUSINESS', template: 'Anwendungsfälle [Bereich] - [Details]', icon: TrendingUp },
   ]
 
   const addTemplate = (template: string) => {
@@ -148,12 +148,14 @@ export default function TaskInput({ onSave, onBack, initialContent = '' }: TaskI
             onChange={(e) => setContent(e.target.value)}
             placeholder="Geben Sie hier alle Ihre Aufgaben ein (eine pro Zeile)...
 
-Beispiele:
-• Meeting mit Vorstand Donnerstag 14:00 - Budget verhandeln
-• KI-Strategieplan für Q2 finalisieren - deadline 15. März
-• Research: Machine Learning für Energieprognosen
-• Business Idee: KI-Kurse entwickeln
-• Compliance Audit: GDPR für KI-Tools - kritisch"
+Beispiele (basierend auf Ihren erfolgreichen Patterns):
+• 2.9.25 Firma Zalazium
+• DotSource Termin offen  
+• Offen Checkliste Haufe KI Gold - Anwendungsanweisung
+• Anwendungsfälle Controlling
+• Setup Laptop - Google Konto
+• Prompting Master
+• Pain Points Abteilungen - Priorisierung"
             className="w-full border-2 border-black rounded px-4 py-4 min-h-80 font-mono text-sm resize-y focus:outline-none focus:ring-2 focus:ring-black"
           />
           
