@@ -28,7 +28,6 @@ export type BasicAnalysis = {
 export type AIAnalysis = {
   semanticInsights: {
     energyDomainItems: Array<{ text: string; insight?: string; businessPotential: string }>
-    tradingRelated: Array<{ text: string; marketTiming: string; riskLevel: string }>
     businessOpportunities: Array<{ text: string; monetizationPotential: string; effort?: string }>
     riskClusters: Array<{ cluster: string; items: string[]; severity: 'critical' | 'high' | 'medium' }>
   }
@@ -49,25 +48,22 @@ export type AIAnalysis = {
 export const exampleContent = `KI-Strategieplan für Q2 finalisieren - regulatorische Deadline 15. März
 Meeting mit Stadtwerke-Vorstand Donnerstag 14:00 - Digitalisierungsbudget verhandeln
 Research: Machine Learning für Energieprognosen - Wettbewerbsvorteil schaffen
-Trading Setup: Intraday Stromfutures Volatilitätsstrategie optimieren - wichtig
-Mindfulness Session nach stressigem Handelstag einplanen - Work-Life Balance
+Mindfulness Session nach stressigem Arbeitstag einplanen - Work-Life Balance
 Business Idee: KI-Prompting Kurse für Studenten entwickeln - Nebeneinkommen
 Compliance Audit: GDPR für neue KI-Tools - Rechtsrisiko minimieren
 Innovation Lab Kick-off Freitag - Blockchain für Smart Grid evaluieren
 Deep Learning Workshop buchen - Skillbuilding für Energieprognosen
 Datenschutz-Impact-Assessment für ML-Algorithmen vorbereiten - kritisch
-Position Management: Strommarkt Hedging-Strategien verfeinern
 Call IT-Security 16:30 - KI-Governance Framework definieren
 Renewable Energy Forecasting Paper lesen - technisches Wissen erweitern
 Legacy System Integration Problem - KI-Tools Kompatibilität prüfen
 Business Plan Draft: KI-Beratung für kleinere Stadtwerke erstellen
-Yoga Session heute Abend - Stressmanagement nach volatilen Markets
+Yoga Session heute Abend - Stressmanagement nach anspruchsvollem Tag
 Risikomanagement Quarterly Review vorbereiten - Vorstandspräsentation
 Marktanalyse: Energy-AI-Solutions Competitive Landscape
 Stadtwerke Roadmap Meeting - Transformation Strategy diskutieren
 Regulatory Report BNetzA Meldung fertigstellen - deadline morgen
 Student anfragen: Masterarbeit über KI im Energiesektor betreuen
-Trading Journal analysieren - Performance Patterns identifizieren
 Prompt Engineering Guide für Energiebranche schreiben - Content Marketing`
 
 export function performBasicAnalysis(content: string): BasicAnalysis {
@@ -136,11 +132,6 @@ export function generateFallbackAIAnalysis(basic: BasicAnalysis): AIAnalysis {
         { text: 'Energy Forecasting ML', insight: 'Direct operational improvement', businessPotential: 'Proprietary algorithm development' },
         { text: 'Renewable Energy Analysis', insight: 'Future energy mix strategy', businessPotential: 'Expertise monetization through training' }
       ],
-      tradingRelated: [
-        { text: 'Intraday Futures Strategy', marketTiming: 'Volatility requires immediate optimization', riskLevel: 'HIGH - Capital at risk' },
-        { text: 'Hedging Strategies', marketTiming: 'Critical in volatile markets', riskLevel: 'MEDIUM - Protection' },
-        { text: 'Trading Journal Analysis', marketTiming: 'Enables strategy refinement', riskLevel: 'LOW - Learning focus' }
-      ],
       businessOpportunities: [
         { text: 'KI-Prompting Kurse', monetizationPotential: 'Direct revenue through education', effort: 'medium' },
         { text: 'AI Consulting Stadtwerke', monetizationPotential: 'B2B expertise monetization', effort: 'high' },
@@ -149,7 +140,7 @@ export function generateFallbackAIAnalysis(basic: BasicAnalysis): AIAnalysis {
       riskClusters: [
         { cluster: 'Regulatory Compliance', items: ['GDPR Audit', 'BNetzA Meldung'], severity: 'critical' },
         { cluster: 'Technology Integration', items: ['Legacy System Problems'], severity: 'high' },
-        { cluster: 'Market Risk', items: ['Trading Strategy Optimization'], severity: 'medium' }
+        { cluster: 'Strategic Planning', items: ['KI-Strategieplan Q2'], severity: 'medium' }
       ]
     },
     intelligentPrioritization: {
@@ -159,9 +150,9 @@ export function generateFallbackAIAnalysis(basic: BasicAnalysis): AIAnalysis {
         { item: 'Vorstand Digitalisierungsbudget', reasoning: 'Strategic funding decision', deadline: 'This week' }
       ],
       workLifeBalance: [
-        { item: 'Mindfulness Session', balanceImpact: 'positive', recommendation: 'After trading hours' },
-        { item: 'Yoga Session', balanceImpact: 'positive', recommendation: 'Stress relief after volatile days' },
-        { item: 'Trading Setup Optimization', balanceImpact: 'negative', recommendation: 'Time-box to prevent overwork' }
+        { item: 'Mindfulness Session', balanceImpact: 'positive', recommendation: 'After work hours' },
+        { item: 'Yoga Session', balanceImpact: 'positive', recommendation: 'Stress relief after demanding days' },
+        { item: 'KI-Strategieplan', balanceImpact: 'negative', recommendation: 'Time-box to prevent overwork' }
       ],
       regulatoryUrgency: [
         { item: 'BNetzA Report', complianceRisk: 'CRITICAL', action: 'Complete immediately' },
@@ -183,4 +174,3 @@ export function generateFallbackAIAnalysis(basic: BasicAnalysis): AIAnalysis {
     }
   }
 }
-
