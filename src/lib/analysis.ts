@@ -1,3 +1,246 @@
+// src/lib/analysis.ts
+
+// ---------------------------------------------
+// Types
+// ---------------------------------------------
+export type Item = {
+  id: number
+  text: string
+  priority: 'HIGH' | 'MEDIUM' | 'LOW'
+  category: 'GENERAL' | 'BUSINESS' | 'RISK' | 'TERMIN' | 'KNOWLEDGE'
+  confidence: number
+  matchedKeywords?: string[]
+}
+
+export type BasicAnalysis = {
+  todos: Item[]
+  termine: Item[]
+  knowledge: Item[]
+  risiken: Item[]
+  business: Item[]
+  insights: {
+    totalItems: number
+    priorityDistribution: { high: number; medium: number; low: number }
+    categoryDistribution: {
+      todos: number
+      termine: number
+      knowledge: number
+      risiken: number
+      business: number
+    }
+  }
+  categorizationFeedback: {
+    uncategorized: string[]
+    lowConfidence: Item[]
+    suggestions: string[]
+  }
+}
+
+export type AIAnalysis = {
+  semanticInsights: {
+    energyDomainItems: Array<{ text: string; insight?: string; businessPotential: string; source: 'detected' | 'static' }>
+    businessOpportunities: Array<{ text: string; monetizationPotential: string; effort?: string }>
+    riskClusters: Array<{ cluster: string; items: string[]; severity: 'critical' | 'high' | 'medium' }>
+  }
+  intelligentPrioritization: {
+    criticalPath: Array<{ item: string; reasoning: string; deadline: string }>
+    workLifeBalance: Array<{ item: string; balanceImpact: 'positive' | 'negative'; recommendation: string }>
+    regulatoryUrgency: Array<{ item: string; complianceRisk: 'CRITICAL' | 'HIGH' | 'MEDIUM'; action: string }>
+  }
+  predictiveRecommendations: Array<{ 
+    type: 'STRATEGIC' | 'RISK' | 'BUSINESS' | 'PERFORMANCE'
+    title: string
+    message: string
+    confidence: number
+    basis: string
+  }>
+  performanceMetrics: {
+    knowledgeToActionRatio: number
+    businessFocusScore: number
+    riskManagementCoverage: number
+    workLifeIntegration: number
+    categorizationAccuracy: number
+    keywordCoverage: number
+  }
+}
+
+// ---------------------------------------------
+// Empty Default (für sichere Initialisierung)
+// ---------------------------------------------
+export const EMPTY_BASIC_ANALYSIS: BasicAnalysis = {
+  todos: [],
+  termine: [],
+  knowledge: [],
+  risiken: [],
+  business: [],
+  insights: {
+    totalItems: 0,
+    priorityDistribution: { high: 0, medium: 0, low: 0 },
+    categoryDistribution: {
+      todos: 0,
+      termine: 0,
+      knowledge: 0,
+      risiken: 0,
+      business: 0,
+    },
+  },
+  categorizationFeedback: {
+    uncategorized: [],
+    lowConfidence: [],
+    suggestions: [],
+  },
+}
+
+// ---------------------------------------------
+// Example Content
+// ---------------------------------------------
+export const exampleContent = `KI-Strategieplan für Q2 finalisieren - regulatorische Deadline 15. März
+Meeting mit Stadtwerke-Vorstand Donnerstag 14:00 - Digitalisierungsbudget verhandeln
+Research: Machine Learning für Energieprognosen - Wettbewerbsvorteil schaffen
+Mindfulness Session nach stressigem Arbeitstag einplanen - Work-Life Balance
+Business Idee: KI-Prompting Kurse für Studenten entwickeln - Nebeneinkommen
+Compliance Audit: GDPR für neue KI-Tools - Rechtsrisiko minimieren
+Innovation Lab Kick-off Freitag - Blockchain für Smart Grid evaluieren
+Deep Learning Workshop buchen - Skillbuilding für Energieprognosen
+Datenschutz-Impact-Assessment für ML-Algorithmen vorbereiten - kritisch
+Call IT-Security 16:30 - KI-Governance Framework definieren
+Renewable Energy Forecasting Paper lesen - technisches Wissen erweitern
+Legacy System Integration Problem - KI-Tools Kompatibilität prüfen
+Business Plan Draft: KI-Beratung für kleinere Stadtwerke erstellen
+Yoga Session heute Abend - Stressmanagement nach anspruchsvollem Tag
+Risikomanagement Quarterly Review vorbereiten - Vorstandspräsentation
+Marktanalyse: Energy-AI-Solutions Competitive Landscape
+Stadtwerke Roadmap Meeting - Transformation Strategy diskutieren
+Regulatory Report BNetzA Meldung fertigstellen - deadline morgen
+Student anfragen: Masterarbeit über KI im Energiesektor betreuen
+Prompt Engineering Guide für Energiebranche schreiben - Content Marketing`
+
+// ---------------------------------------------
+// Keyword Sets
+// ---------------------------------------------
+const keywordSets = {
+  urgent: ['urgent', 'asap', 'sofort', 'dringend', 'wichtig', 'deadline', 'kritisch', 'morgen', 'heute', 'eilig', 'priority', 'offen', 'muss'],
+  termine: ['termin', 'meeting', 'call', 'besprechung', 'datum', 'uhr', 'kick-off', 'donnerstag', 'freitag', 'montag', 'dienstag', 'mittwoch', 'samstag', 'sonntag', 'workshop', 'konferenz', 'presentation', 'demo', 'review', 'vorstellung', 'firma', 'gespräch', 'gespräche', 'mitarbeiterversammlung', 'wirtschaftsförderung', 'akademie', 'weiterbildung', 'seminar'],
+  knowledge: ['lernen', 'research', 'studium', 'wissen', 'analyse', 'workshop', 'kurs', 'lesen', 'paper', 'buch', 'training', 'fortbildung', 'weiterbildung', 'skill', 'kompetenz', 'expertise', 'zertifikat', 'iso', 'iec', 'standard', 'spezialisierung', 'orchestrierung', 'bedienung', 'governance', 'prompting', 'prompt', 'automationen', 'agentic ai', 'agenten', 'ki', 'ai', 'artificial intelligence', 'machine learning', 'ml'],
+  risk: ['risiko', 'risk', 'gefahr', 'problem', 'compliance', 'audit', 'datenschutz', 'gdpr', 'legal', 'regulatorisch', 'bnetza', 'gesetz', 'verordnung', 'haftung', 'sicherheit', 'vulnerability', 'threat', 'pain points', 'problemfelder', 'herausforderung', 'schwierigkeit'],
+  business: ['business', 'idee', 'plan', 'beratung', 'monetar', 'einkommen', 'kunde', 'markt', 'umsatz', 'gewinn', 'roi', 'investment', 'strategie', 'marketing', 'verkauf', 'akquisition', 'expansion', 'anwendungsfälle', 'controlling', 'vertrieb', 'abrechnung', 'prozesse', 'unternehmenskommunikation', 'abteilungen', 'priorisierung', 'ansprechpartner', 'beraterfirmen', 'externe', 'vorbereitung', 'neuaufstellung', 'leitfaden'],
+  setup: ['setup', 'installation', 'konfiguration', 'laptop', 'google konto', 'checkliste', 'formular', 'anwendungsanweisung', 'liste erstellen', 'recherche', 'abfrage'],
+  energy: ['energie', 'strom', 'gas', 'stadtwerke', 'smart grid', 'renewable', 'photovoltaik', 'windkraft', 'energieprognose', 'netzbetrieb', 'eeg', 'kwk', 'fernwärme', 'blockchain', 'e-mobility', 'speicher', 'wemag', 'dotsource', 'rostock', 'innocampus']
+} as const
+
+// ---------------------------------------------
+// Analysis Functions
+// ---------------------------------------------
+export function performBasicAnalysis(content: string): BasicAnalysis {
+  if (!content?.trim()) return EMPTY_BASIC_ANALYSIS
+
+  const lines = content.split('\n').filter(line => line.trim())
+  const todos: Item[] = []
+  const termine: Item[] = []
+  const knowledge: Item[] = []
+  const risiken: Item[] = []
+  const business: Item[] = []
+  const uncategorized: string[] = []
+  const lowConfidence: Item[] = []
+  const suggestions: string[] = []
+
+  lines.forEach((line, index) => {
+    const lower = line.toLowerCase()
+    let category: Item['category'] = 'GENERAL'
+    let priority: Item['priority'] = 'MEDIUM'
+    let confidence = 0.5
+    const matchedKeywords: string[] = []
+
+    if (keywordSets.urgent.some(k => {
+      if (lower.includes(k)) { matchedKeywords.push(k); return true }
+      return false
+    })) {
+      priority = 'HIGH'
+      confidence += 0.2
+    }
+
+    const categoryScores: Record<'business' | 'risk' | 'termine' | 'knowledge' | 'energy', number> = {
+      business: 0, risk: 0, termine: 0, knowledge: 0, energy: 0
+    }
+
+    Object.entries(keywordSets).forEach(([cat, keywords]) => {
+      if (cat === 'urgent') return
+      if (!(cat in categoryScores)) return
+      keywords.forEach(keyword => {
+        if (lower.includes(keyword)) {
+          matchedKeywords.push(keyword)
+          categoryScores[cat as keyof typeof categoryScores] += 1
+          confidence += 0.1
+        }
+      })
+    })
+
+    const bestCategoryEntry = Object.entries(categoryScores).reduce(
+      (best, curr) => (curr[1] > best[1] ? curr : best), ['business', 0] as [string, number]
+    )
+    const bestCategory = bestCategoryEntry[0] as keyof typeof categoryScores
+    const maxScore = bestCategoryEntry[1]
+
+    if (maxScore === 0) {
+      uncategorized.push(line)
+      category = 'GENERAL'
+      confidence = Math.min(confidence, 0.3)
+    } else if (maxScore === 1) {
+      confidence = Math.min(confidence, 0.7)
+    }
+
+    switch (bestCategory) {
+      case 'business': category = 'BUSINESS'; break
+      case 'risk': category = 'RISK'; priority = 'HIGH'; break
+      case 'termine': category = 'TERMIN'; break
+      case 'knowledge': category = 'KNOWLEDGE'; break
+    }
+
+    const item: Item = { 
+      id: index, text: line.trim(), priority, category, 
+      confidence: Math.min(confidence, 1.0), matchedKeywords 
+    }
+
+    if (confidence < 0.6) lowConfidence.push(item)
+
+    switch (category) {
+      case 'BUSINESS': business.push(item); break
+      case 'RISK': risiken.push(item); break
+      case 'TERMIN': termine.push(item); break
+      case 'KNOWLEDGE': knowledge.push(item); break
+      default: todos.push(item)
+    }
+  })
+
+  if (uncategorized.length > 0)
+    suggestions.push(`${uncategorized.length} Items konnten nicht kategorisiert werden.`)
+  if (lowConfidence.length > 3)
+    suggestions.push("Mehrere Items haben niedrige Konfidenz. Verwenden Sie klarere Begriffe.")
+
+  const flat = [...todos, ...termine, ...knowledge, ...risiken, ...business]
+  const insights = {
+    totalItems: lines.length,
+    priorityDistribution: {
+      high: flat.filter(i => i.priority === 'HIGH').length,
+      medium: flat.filter(i => i.priority === 'MEDIUM').length,
+      low: flat.filter(i => i.priority === 'LOW').length,
+    },
+    categoryDistribution: {
+      todos: todos.length,
+      termine: termine.length,
+      knowledge: knowledge.length,
+      risiken: risiken.length,
+      business: business.length,
+    },
+  }
+
+  return { todos, termine, knowledge, risiken, business, insights, categorizationFeedback: { uncategorized, lowConfidence, suggestions } }
+}
+
+// ---------------------------------------------
+// generateFallbackAIAnalysis bleibt unverändert
+// (deine bestehende Version hier einsetzen)
+// ---------------------------------------------
 // ---------------------------------------------
 // Types
 // ---------------------------------------------
